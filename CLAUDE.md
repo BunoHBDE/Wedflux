@@ -7,7 +7,7 @@ App Android (iPhone depois) de organização financeira de casamento. O casal (a
 Expo (React Native) + TypeScript estrito · Supabase (auth, Postgres + RLS, storage, edge functions, pg_cron) · RevenueCat · expo-notifications (FCM). Push remoto não funciona no Expo Go: usar development build (EAS Build).
 
 ## Estado
-Só documentação e banco. O banco (projeto `nhfujhpteolhndsyqsys`) já está aplicado. O app Expo ainda não existe; começa pelo onboarding.
+Banco aplicado (projeto `nhfujhpteolhndsyqsys`). App Expo com a etapa 1 (login, casamento, convite) escrita; próxima: etapa 2 (onboarding, itens, parcelas, home).
 
 ## Estrutura de pastas planejada
 ```
@@ -39,7 +39,7 @@ docs/           documentação (fonte de verdade do produto)
 - `.env*` fora do git (exceto `.env.example`).
 
 ## Comandos
-A definir (sem código ainda). Previstos: `npx expo start`, `eas build`, `supabase db push`, `supabase gen types typescript`.
+`npm install` · `npm run typecheck` · `npx expo start` · `eas build` (a configurar) · `supabase db push` / `supabase gen types typescript`. Sem `npx expo install` neste ambiente (a API da Expo é bloqueada): usar `npm install pacote@versão` com as versões de `node_modules/expo/bundledNativeModules.json`.
 
 ## Documentos
 Leia antes de codar: `docs/03-regras-de-negocio.md` e `docs/05-banco-de-dados.md`.
