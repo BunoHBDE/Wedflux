@@ -7,7 +7,7 @@ App Android (iPhone depois) de organização financeira de casamento. O casal (a
 Expo (React Native) + TypeScript estrito · Supabase (auth, Postgres + RLS, storage, edge functions, pg_cron) · RevenueCat · expo-notifications (FCM). Push remoto não funciona no Expo Go: usar development build (EAS Build).
 
 ## Estado
-Banco aplicado (projeto `nhfujhpteolhndsyqsys`). App Expo com a etapa 1 (login, casamento, convite) escrita; próxima: etapa 2 (onboarding, itens, parcelas, home).
+Banco aplicado (projeto `nhfujhpteolhndsyqsys`). App Expo com a etapa 1 (login, casamento, convite) escrita; etapa 2 escrita (onboarding, itens, parcelas, home); próxima: etapa 3 (checklist de decisões e push).
 
 ## Estrutura de pastas planejada
 ```

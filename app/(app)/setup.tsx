@@ -1,116 +1,83 @@
 import { Redirect, useRouter } from 'expo-router';
-import { useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { ScrollView, Text } from 'react-native';
+import { clearAnswers, loadAnswers } from '../../src/features/onboarding/store';
 import { useWedding } from '../../src/features/wedding/useWedding';
+import { parseBrDate } from '../../src/lib/dates';
+import { parseMoney } from '../../src/lib/money';
 import { supabase } from '../../src/lib/supabase';
-import { Button, ErrorText, Field, Loading, colors, s } from '../../src/lib/ui';
-import type { WeddingStyle } from '../../src/types/database';
+import { Button, ErrorText, Field, Loading, s } from '../../src/lib/ui';
 
-const STYLES: { value: WeddingStyle; label: string }[] = [
-  { value: 'so_necessario', label: 'Só o necessário' },
-  { value: 'minimalista', label: 'Minimalista' },
-  { value: 'completo', label: 'Completo' },
-];
-
-// "DD/MM/AAAA" -> "AAAA-MM-DD" (null se inválida)
-function parseBrDate(text: string): string | null {
-  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(text.trim());
-  if (!m) return null;
-  const [, d, mo, y] = m;
-  const date = new Date(Number(y), Number(mo) - 1, Number(d));
-  if (date.getFullYear() !== Number(y) || date.getMonth() !== Number(mo) - 1 || date.getDate() !== Number(d)) return null;
-  return `${y}-${mo}-${d}`;
-}
-
+/**
+ * Pós-login sem casamento:
+ *  - se há respostas do onboarding no aparelho, cria o casamento (create_wedding) e limpa o rascunho;
+ *  - senão, mostra "Tenho um convite" (accept_invite) ou volta ao onboarding.
+ */
 export default function Setup() {
   const router = useRouter();
   const { loading, wedding, refresh } = useWedding();
-  const [mode, setMode] = useState<'choose' | 'create' | 'join'>('choose');
-  const [name, setName] = useState('');
-  const [date, setDate] = useState('');
-  const [budget, setBudget] = useState('');
-  const [style, setStyle] = useState<WeddingStyle>('completo');
-  const [destination, setDestination] = useState(false);
+  const [phase, setPhase] = useState<'checking' | 'creating' | 'choose'>('checking');
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const started = useRef(false);
 
-  if (loading) return <Loading />;
+  useEffect(() => {
+    if (loading || wedding || started.current) return;
+    started.current = true;
+    (async () => {
+      const a = await loadAnswers();
+      const iso = parseBrDate(a.dateText);
+      if (!a.completed || !iso || !a.style || a.destination === null) return setPhase('choose');
+
+      setPhase('creating');
+      const { error } = await supabase.rpc('create_wedding', {
+        p_wedding_date: iso,
+        p_style: a.style,
+        p_is_destination: a.destination,
+        p_total_budget: parseMoney(a.budget) ?? 0,
+        p_guest_count: a.guests ? Number(a.guests) : undefined,
+        p_date_is_approximate: a.dateApproximate,
+        p_concerns: a.concerns,
+        p_usage_goals: a.goals,
+        p_already_hired: a.alreadyHired ?? false,
+        p_contracted_catalog_item_ids: a.contractedIds,
+        p_display_name: a.name.trim() || undefined,
+        p_role: a.role ?? undefined,
+        p_acquisition_source: a.source ?? undefined,
+      });
+      if (error) {
+        setError(error.message);
+        return setPhase('choose');
+      }
+      await clearAnswers();
+      await refresh();
+      router.replace('/');
+    })();
+  }, [loading, wedding, refresh, router]);
+
+  if (loading || phase !== 'choose') return <Loading />;
   if (wedding) return <Redirect href="/" />;
 
-  async function submit(fn: () => PromiseLike<{ error: { message: string } | null }>) {
+  async function join() {
     setBusy(true);
     setError(null);
-    const { error } = await fn();
+    const { error } = await supabase.rpc('accept_invite', { p_code: code });
     setBusy(false);
     if (error) return setError(error.message);
     await refresh();
     router.replace('/');
   }
 
-  const create = () => {
-    const iso = parseBrDate(date);
-    const total = Number(budget.replace(/\./g, '').replace(',', '.') || '0');
-    if (!iso) return setError('Informe a data no formato DD/MM/AAAA.');
-    if (Number.isNaN(total) || total < 0) return setError('Orçamento inválido.');
-    return submit(() =>
-      supabase.rpc('create_wedding', {
-        p_wedding_date: iso,
-        p_style: style,
-        p_is_destination: destination,
-        p_total_budget: total,
-        p_display_name: name.trim() || undefined,
-      }),
-    );
-  };
-
-  const join = () => submit(() => supabase.rpc('accept_invite', { p_code: code }));
-
-  if (mode === 'choose') {
-    return (
-      <ScrollView contentContainerStyle={s.screen}>
-        <Text style={s.title}>Vamos começar</Text>
-        <Text style={s.sub}>Crie o casamento ou entre no do seu parceiro(a) com um código.</Text>
-        <Button title="Criar meu casamento" onPress={() => setMode('create')} />
-        <Button title="Tenho um convite" onPress={() => setMode('join')} variant="link" />
-        <Button title="Sair" onPress={() => supabase.auth.signOut()} variant="link" />
-      </ScrollView>
-    );
-  }
-
-  if (mode === 'join') {
-    return (
-      <ScrollView contentContainerStyle={s.screen} keyboardShouldPersistTaps="handled">
-        <Text style={s.title}>Tenho um convite</Text>
-        <Field label="Código do convite" value={code} onChangeText={(t) => setCode(t.toUpperCase())} autoCorrect={false} />
-        <ErrorText>{error}</ErrorText>
-        <Button title="Entrar no casamento" onPress={join} disabled={busy || code.trim().length === 0} />
-        <Button title="Voltar" onPress={() => setMode('choose')} variant="link" />
-      </ScrollView>
-    );
-  }
-
   return (
     <ScrollView contentContainerStyle={s.screen} keyboardShouldPersistTaps="handled">
-      <Text style={s.title}>Seu casamento</Text>
-      <Field label="Seu nome" value={name} onChangeText={setName} autoCapitalize="words" />
-      <Field label="Data (DD/MM/AAAA)" value={date} onChangeText={setDate} keyboardType="numbers-and-punctuation" placeholder="19/06/2027" />
-      <Field label="Orçamento total (R$)" value={budget} onChangeText={setBudget} keyboardType="decimal-pad" placeholder="50000" />
-      <Text style={s.label}>Estilo</Text>
-      <View style={{ marginBottom: 12 }}>
-        {STYLES.map((o) => (
-          <Button key={o.value} title={(style === o.value ? '● ' : '○ ') + o.label} onPress={() => setStyle(o.value)} variant="link" />
-        ))}
-      </View>
-      <Button
-        title={(destination ? '☑ ' : '☐ ') + 'Destination wedding'}
-        onPress={() => setDestination((v) => !v)}
-        variant="link"
-      />
+      <Text style={s.title}>Entrar no casamento</Text>
+      <Text style={s.sub}>Digite o código que seu parceiro(a) enviou.</Text>
+      <Field label="Código do convite" value={code} onChangeText={(t) => setCode(t.toUpperCase())} autoCorrect={false} />
       <ErrorText>{error}</ErrorText>
-      <Button title="Gerar meu plano" onPress={create} disabled={busy} />
-      <Button title="Voltar" onPress={() => setMode('choose')} variant="link" />
-      <Text style={{ color: colors.muted, marginTop: 12 }}>O onboarding completo (16 etapas) entra na etapa 2.</Text>
+      <Button title="Entrar no casamento" onPress={join} disabled={busy || code.trim().length === 0} />
+      <Button title="Criar meu casamento" onPress={() => router.replace('/onboarding')} variant="link" />
+      <Button title="Sair" onPress={() => supabase.auth.signOut()} variant="link" />
     </ScrollView>
   );
 }

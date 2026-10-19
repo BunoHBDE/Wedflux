@@ -41,3 +41,15 @@ export const s = StyleSheet.create({
   btnText: { color: '#FFF', fontWeight: '700' },
   card: { borderWidth: 1, borderColor: colors.border, borderRadius: 8, padding: 16, marginBottom: 12 },
 });
+
+export function Choice({ label, hint, selected, onPress }: { label: string; hint?: string; selected: boolean; onPress: () => void }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={[s.card, { marginBottom: 8 }, selected && { borderColor: colors.primary, backgroundColor: '#F6EDF4' }]}
+    >
+      <Text style={{ fontWeight: '600', color: colors.text }}>{(selected ? '● ' : '○ ') + label}</Text>
+      {hint ? <Text style={{ color: colors.muted }}>{hint}</Text> : null}
+    </Pressable>
+  );
+}

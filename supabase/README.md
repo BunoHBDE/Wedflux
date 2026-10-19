@@ -29,3 +29,14 @@ Nova mudança: `supabase migration new <nome>`, editar o arquivo gerado, testar 
 
 Nunca edite o banco pelo painel sem gerar uma migração correspondente neste diretório. Quem altera o banco "na mão" deixa o repositório mentindo.
 Toda tabela nova nasce com RLS ligada e políticas; privilégios mínimos (`revoke all` e `grant` por coluna).
+
+## Testar o app antes da etapa 4 (assinatura)
+
+Sem linha em `subscriptions`, o casamento fica em somente leitura e o banco recusa escritas em itens e parcelas. Para testar a etapa 2 com um casamento **de teste**, rode no SQL Editor do Supabase (como administrador; é dado de teste, não migração):
+
+```sql
+insert into public.subscriptions (wedding_id, status, entitlement_expires_at)
+values ('<id do casamento de teste>', 'active', now() + interval '30 days')
+on conflict (wedding_id) do update set status = 'active', entitlement_expires_at = excluded.entitlement_expires_at;
+```
+Nunca faça isso com dados reais de clientes; o webhook do RevenueCat assume esse papel na etapa 4.

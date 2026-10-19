@@ -12,7 +12,7 @@ Expo (React Native) + TypeScript · Supabase (login, Postgres com RLS, storage, 
 
 - Documentos de base: prontos para revisão (`docs/`).
 - Banco: aplicado no projeto Supabase `wedflux` (ref `nhfujhpteolhndsyqsys`, us-west-2): 12 tabelas com RLS, 54 itens de catálogo, bucket privado `contratos`.
-- App Expo: etapa 1 (base) escrita: login por e-mail e Google, criar casamento, convite do parceiro(a). Falta testar em aparelho e ativar o login no painel do Supabase (e-mail e Google).
+- App Expo: etapas 1 e 2 escritas (login, casamento, convite; onboarding, itens, parcelas, home). Verificado: TypeScript, testes das funções puras e bundle Android. Falta testar em aparelho, ativar o login no Supabase e a assinatura (etapa 4); veja `supabase/README.md` para testar escritas antes dela.
 
 ## Como rodar
 
@@ -20,6 +20,7 @@ Expo (React Native) + TypeScript · Supabase (login, Postgres com RLS, storage, 
 npm install
 cp .env.example .env   # preencha EXPO_PUBLIC_SUPABASE_URL e EXPO_PUBLIC_SUPABASE_ANON_KEY
 npm run typecheck
+npm test               # funções puras (dinheiro, datas, plano)
 npx expo start         # login com Google e push exigem development build (EAS), não o Expo Go
 ```
 Banco: ver `supabase/README.md`.

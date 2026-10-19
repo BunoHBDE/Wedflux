@@ -8,12 +8,13 @@ function Gate() {
   const segments = useSegments();
   const router = useRouter();
   const inAuth = segments[0] === '(auth)';
+  const inOnboarding = segments[0] === '(onboarding)';
 
   useEffect(() => {
     if (loading) return;
-    if (!session && !inAuth) router.replace('/login');
+    if (!session && !inAuth && !inOnboarding) router.replace('/onboarding');
     else if (session && inAuth) router.replace('/');
-  }, [session, loading, inAuth, router]);
+  }, [session, loading, inAuth, inOnboarding, router]);
 
   return loading ? <Loading /> : <Slot />;
 }

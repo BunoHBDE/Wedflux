@@ -8,6 +8,7 @@
     "expo": "~58.0.14",
     "expo-constants": "~58.0.12",
     "expo-linking": "~58.0.13",
+    "expo-notifications": "~58.1.5",
     "expo-router": "~58.0.23",
     "expo-secure-store": "~58.0.2",
     "expo-status-bar": "~58.0.3",
@@ -19,6 +20,7 @@
     "react-native-url-polyfill": "^4.0.0"
   },
   "devDependencies": {
+    "@types/node": "^22.20.5",
     "@types/react": "~19.3.0",
     "typescript": "~6.0.3"
   },
@@ -27,7 +29,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node --test --experimental-strip-types src/lib/lib.test.ts"
   },
   "private": true
 }

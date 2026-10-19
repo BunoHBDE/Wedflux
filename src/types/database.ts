@@ -4,6 +4,7 @@
 export type PartnerRole = 'noiva' | 'noivo' | 'outro';
 export type MemberRole = 'owner' | 'partner';
 export type WeddingStyle = 'so_necessario' | 'minimalista' | 'completo';
+export type ItemStatus = 'a_decidir' | 'contratado' | 'pago' | 'nao_se_aplica';
 export type SubscriptionStatus = 'trialing' | 'active' | 'canceled' | 'billing_issue' | 'expired';
 
 type Row<T> = { Row: T; Insert: Partial<T>; Update: Partial<T>; Relationships: [] };
@@ -35,6 +36,52 @@ export type Database = {
         user_id: string;
         role: MemberRole;
         joined_at: string;
+      }>;
+      catalog_categories: Row<{ id: number; name: string; sort_order: number }>;
+      catalog_items: Row<{
+        id: number;
+        category_id: number;
+        name: string;
+        level: number;
+        is_essential: boolean;
+        destination_only: boolean;
+        lead_months: number;
+        notes: string | null;
+        sort_order: number;
+        active: boolean;
+      }>;
+      items: Row<{
+        id: string;
+        wedding_id: string;
+        catalog_item_id: number | null;
+        category_id: number;
+        name: string;
+        level: number;
+        is_essential: boolean;
+        lead_months: number | null;
+        status: ItemStatus;
+        decision_deadline: string | null;
+        deadline_postponed: boolean;
+        decided_at: string | null;
+        estimated_amount: number | null;
+        contracted_amount: number | null;
+        supplier_name: string | null;
+        notes: string | null;
+        sort_order: number;
+        created_by: string | null;
+        updated_by: string | null;
+      }>;
+      payments: Row<{
+        id: string;
+        item_id: string;
+        wedding_id: string;
+        installment_no: number;
+        due_date: string;
+        expected_amount: number;
+        paid_at: string | null;
+        paid_amount: number | null;
+        created_by: string | null;
+        updated_by: string | null;
       }>;
       subscriptions: Row<{
         wedding_id: string;

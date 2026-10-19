@@ -14,6 +14,8 @@ Divididas por momento: o que precisa de resposta para **começar a construir** (
 | 8 | Divergência: escopo diz "12 telas de pergunta"; a tabela lista 11 perguntas (3–12 + nome) mais boas-vindas | Clareza na contagem | Tratar a tabela de 16 etapas como a fonte | Bruno |
 | 9 | Divergência: "Contratado" no escopo = soma dos valores fechados dos itens; a view `wedding_summary` só soma itens `contratado`/`pago` | Itens `nao_se_aplica` ou `a_decidir` com valor fechado ficam de fora | Manter o SQL (mais coerente); registrar no escopo | Bruno |
 | 10 | Divergência: escopo diz push de "prazos de decisão"; `due_reminders` só avisa itens **essenciais** `a_decidir` | Itens não essenciais nunca geram push | Manter (alinha com o checklist enxuto) e deixar explícito | Bruno |
+| 18 | Opções das perguntas "O que mais te preocupa?", "Onde ouviu falar da gente?" e "Como quer usar o app?" | O escopo não lista as opções; o app usa textos provisórios (`src/features/onboarding/options.ts`) | Revisar os textos com você | Bruno |
+| 19 | Onboarding: o app não registra evento por tela nem mostra o paywall (etapas 15–16 do fluxo) ainda | Escopo pede 1 evento por tela; paywall é a etapa 4 | Entram com analytics (questão 14) e RevenueCat | Bruno |
 
 ## Podem esperar (perto do teste fechado e do lançamento)
 
