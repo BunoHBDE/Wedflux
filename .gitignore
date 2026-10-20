@@ -1,0 +1,38 @@
+# Node
+node_modules/
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+*.log
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# Builds nativos gerados
+android/
+ios/
+
+# Env (só o exemplo vai para o git)
+.env
+.env*
+!.env.example
+
+# Supabase
+supabase/.branches/
+supabase/.temp/
+supabase/.env
+
+# SO / editores
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
